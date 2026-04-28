@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id           String      @id @default(uuid()) @db.Char(36)
+  name         String      @db.VarChar(120)
+  email        String      @unique @db.VarChar(191)
+  password     String      @db.VarChar(255)
+  role         Role        @default(USER)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  projects     Project[]
+  auditLogs    AuditLog[]
+
+  @@index([email])
+}
+
+model Project {
+  id          String   @id @default(uuid()) @db.Char(36)
+  title       String   @db.VarChar(180)
+  description String   @db.Text
+  techStack   Json
+  githubLink  String?  @db.VarChar(255)
+  createdById String   @db.Char(36)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([createdById])
+  @@index([title])
+  @@index([createdAt])
+}
+
+model Event {
+  id          String   @id @default(uuid()) @db.Char(36)
+  title       String   @db.VarChar(180)
+  description String   @db.Text
+  date        DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([title])
+  @@index([date])
+}
+
+model Contact {
+  id        String   @id @default(uuid()) @db.Char(36)
+  name      String   @db.VarChar(120)
+  email     String   @db.VarChar(191)
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id         String    @id @default(uuid()) @db.Char(36)
+  userId     String?   @db.Char(36)
+  action     String    @db.VarChar(255)
+  ip         String?   @db.VarChar(45)
+  userAgent  String?   @db.VarChar(255)
+  createdAt  DateTime  @default(now())
+  user       User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model TeamMember {
+  id        String   @id @default(uuid()) @db.Char(36)
+  slug      String   @unique @db.VarChar(120)
+  name      String   @db.VarChar(120)
+  role      String   @db.VarChar(120)
+  skills    Json
+  image     String?  @db.VarChar(255)
+  github    String?  @db.VarChar(255)
+  linkedin  String?  @db.VarChar(255)
+  tier      String   @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([tier])
+}
+
+model Resource {
+  id          String   @id @default(uuid()) @db.Char(36)
+  title       String   @db.VarChar(180)
+  description String   @db.Text
+  url         String   @db.VarChar(255)
+  category    String   @db.VarChar(100)
+  tags        Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+}
+
+model Visual {
+  id          String   @id @default(uuid()) @db.Char(36)
+  title       String   @db.VarChar(180)
+  category    String   @db.VarChar(100)
+  src         String   @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+}
