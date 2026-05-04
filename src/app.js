@@ -10,6 +10,8 @@ const sanitizeInput = require('./middleware/sanitizeInput');
 const notFoundHandler = require('./middleware/notFoundHandler');
 const errorHandler = require('./middleware/errorHandler');
 const routes = require('./routes');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpecs = require('./config/swagger');
 
 const app = express();
 
@@ -34,6 +36,8 @@ app.get('/health', (req, res) => {
     message: 'SOCS backend is healthy'
   });
 });
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, { explorer: true }));
 
 app.use('/api', routes);
 app.use(notFoundHandler);
